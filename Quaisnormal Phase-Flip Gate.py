@@ -7,7 +7,7 @@ System: Hughes Quasinormal Mode Paper
 Author: Atharva Kulkarni
 """
 
-
+"""Importing Libraries"""
 import numpy as np
 import scipy as sp
 import matplotlib
@@ -15,28 +15,28 @@ import matplotlib.pyplot as plt
 from qutip import *
 
 """Global Parameters"""
-wa = 1.0 * 2 * np.pi       #Frequency separation b/w |down> and |e> for A
-wb = 1.0 * 2 * np.pi      #Frequency separation b/w |down> and |e> for B
+wa = 1.0 * 2 * np.pi        #Frequency separation b/w |down> and |e> for A. The transition |down> -> |e> is coupled to the cavity
+wb = 1.0 * 2 * np.pi        #Frequency separation b/w |down> and |e> for B. The transition |down> -> |e> is coupled to the cavity
 
-wga = 0.1      #Frequency separation b/w |up> and  |down> for A
-wgb = 0.1      #Frequency separation b/w |up> and  |down> for B
+wga = 0.1                   #Frequency separation b/w |up> and  |down> for A
+wgb = 0.1                   #Frequency separation b/w |up> and  |down> for B
 
 wCBroad = 1.0 * 2 * np.pi   #Resonant frequency for the broad plasmonic mode
 wCNarrow = 1.0 * 2 * np.pi  #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
-gBroad = 0.04
-gNarrow = 0.04
+gBroad = 0.04               #Coupling rate to the Broad Mode
+gNarrow = 0.04              #Coupling rate to the Narrow Mode
 
 """Decay Rates"""
-gammaA = 0.1
-gammaStarA = 0.02
-gammaB = 0.1
-gammaStarB = 0.02
+gammaA = 0.1                #Decay Rate for System A
+gammaStarA = 0.02           #Dephasing Rate for System A
+gammaB = 0.1                #Decay Rate for System B
+gammaStarB = 0.02           #Dephasing Rate for System B
 
 """Mode Decay rates"""
-ka = 0.02
-kb = 0.04
+ka = 0.02                   #Broad Mode decay rate (I have currently used "a" and Broad interchangably)
+kb = 0.04                   #Narrow Mode decay rate (I have currently used "b" and Narrow interchangably)
 
 
 #Defining S Matrix
@@ -82,7 +82,8 @@ def g(a):
 
 """
 Defining Operators: A similar tensor product between 4 systems. 
-[System A (down -> up), System A (E -> down), System B (down -> up), System B (E -> down) Broad Mode, Narrow Mode]
+Here, the states in increasing order of energy for the systems are |up>, |down>, |e>
+[System A, System B, Broad Mode, Narrow Mode]
 """
 
 downUpA  = tensor(qutrit_ops()[3], qeye(3), qeye(2), qeye(2))             #System A Annhilation operator for transition from down to up
@@ -181,12 +182,11 @@ collapseOperators.append(rootKappaBA * aBroad + rootKappaBB * aNarrow)
 
 
 """Calculating Fidelity"""
-tlist = np.linspace(0,500, 1000) #Time Steps
-sol = mesolve(H, psi0, tlist, collapseOperators)
-fidel = [fidelity(state, psIdeal) for state in sol.states]
+tlist = np.linspace(0,500, 1000)                            #Time Steps
+sol = mesolve(H, psi0, tlist, collapseOperators)            #Solver
+fidel = [fidelity(state, psIdeal) for state in sol.states]  #Fidelity Calculation for each state at time steps defined
 
-print(fidel)
-
+"""Plotting the Results"""
 fig, axes = plt.subplots()
 axes.plot(tlist, fidel)
 plt.show()
