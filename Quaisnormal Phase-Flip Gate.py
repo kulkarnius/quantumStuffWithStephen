@@ -184,11 +184,12 @@ collapseOperators.append(rootKappaBA * aBroad + rootKappaBB * aNarrow)
 
 
 """Calculating Fidelity"""
-tlist = np.linspace(0,500, 1000)                            #Time Steps
+tlist = np.linspace(0,50,1000)                            #Time Steps
 sol = mesolve(H, psi0, tlist, collapseOperators)            #Solver
 fidel = [fidelity(state, psIdeal) for state in sol.states]  #Fidelity Calculation for each state at time steps defined
 
 """Plotting the Results"""
 fig, axes = plt.subplots()
 axes.plot(tlist, fidel)
+axes.set(xlabel="Time (s)", ylabel="Fidelity (Bottom line is about 0.5)", title='Fidelity as a function of time')
 plt.show()
