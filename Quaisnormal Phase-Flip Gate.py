@@ -25,8 +25,10 @@ wCBroad = 1.0 * 2 * np.pi   #Resonant frequency for the broad plasmonic mode
 wCNarrow = 1.0 * 2 * np.pi  #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
-gBroad = 0.04               #Coupling rate to the Broad Mode
-gNarrow = 0.04              #Coupling rate to the Narrow Mode
+gBroadA = 0.04               #Coupling rate for A to the Broad Mode
+gNarrowA = 0.04              #Coupling rate for A to the Narrow Mode
+gBroadB = 0.04               #Coupling rate for B to the Broad Mode
+gNarrowB = 0.04               #Coupling rates for B to the Narrow Mode
 
 """Decay Rates"""
 gammaA = 0.1                #Decay Rate for System A
@@ -64,20 +66,20 @@ def Xm(i,j):
   return Xm
 
 
-"""CHi(X) matrix definition """
+"""Chi(X) matrix definition """
 XpValues = [Xp(0,0), Xp(0,1), Xp(1,0),Xp(1,1)] #X+ = [Xaa, Xab, Xba, Xbb]
 XpMatrix = np.matrix([[XpValues[0], XpValues[1]],[XpValues[2], XpValues[3]]]) #Define Chi(X) Positive matrix
 
-XmValues = [Xm(0,0), Xm(0,1), Xm(1,0),Xm(1,1)] #X- = [Xaa, Xab, Xba, Xbb]
+XmValues = [Xm(0,0),Xm(0,1),Xm(1,0),Xm(1,1)] #X- = [Xaa, Xab, Xba, Xbb]
 XmMatrix = np.matrix([[XmValues[0], XmValues[1]],[XmValues[2], XmValues[3]]]) #Define Chi(X) Minus matrix
 
 #Coupling Constants
 def g(a):
     if a == "a":
-        g = gBroad * S_Sqrt[0][0] + gNarrow * S_Sqrt[1][0]
+        g = gBroadA * S_Sqrt[0][0] + gNarrowA * S_Sqrt[1][0]
         return g
     else:
-        g = gBroad * S_Sqrt[0][1] + gNarrow * S_Sqrt[1][1]
+        g = gBroadB * S_Sqrt[0][1] + gNarrowB * S_Sqrt[1][1]
         return g
 
 """
@@ -132,7 +134,7 @@ def psy(i,j,k,l):
   return a
 
 """Initial State"""
-psi0 = 0.5 * tensor(basis(3,2)+basis(3,0), basis(3,0)+basis(3,1), basis(2,0), basis(2,0))   #tensor(|upA> + |downA>, |upB> + |downB>, |0>_Broad, |0>_Narrow)  )
+psi0 = 0.5 * (psy(2,1,0,0) + psy(2,0,0,0) + psy(0,1,0,0) + psy(0,0,0,0))   #tensor(|upA> + |downA>, |upB> + |downB>, |0>_Broad, |0>_Narrow)  )
 
 """Final Expected State"""
 psIdeal = 0.5 * (-psy(2,1,0,0) + psy(2,0,0,0) + psy(0,1,0,0) + psy(0,0,0,0))
