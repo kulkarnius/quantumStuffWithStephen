@@ -56,7 +56,7 @@ wNarrow = np.complex(wCNarrow, -kb)
 def X(i,j):
   X = wBroad * S_InvSqrt[i][0]*S_Sqrt[0][j] + wNarrow * S_InvSqrt[i][1]*S_Sqrt[1][j]
   return X
-
+  
 def Xp(i,j):
   Xp = (X(i,j) + np.conjugate(X(j,i)))/2
   return Xp
@@ -184,7 +184,7 @@ collapseOperators.append(rootKappaBA * aBroad + rootKappaBB * aNarrow)
 
 
 """Calculating Fidelity"""
-tlist = np.linspace(0,50,1000)                            #Time Steps
+tlist = np.linspace(0,50,1000)                              #Time Steps
 sol = mesolve(H, psi0, tlist, collapseOperators)            #Solver
 fidel = [fidelity(state, psIdeal) for state in sol.states]  #Fidelity Calculation for each state at time steps defined
 
