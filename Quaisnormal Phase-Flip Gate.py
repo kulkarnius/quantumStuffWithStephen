@@ -221,7 +221,7 @@ fideliti = []
 
 for wNarrow in wNarrow:
   sol = mesolve(H(), psi0, tlist, c_ops())          #Solver
-  fidel = [fidelity(state, psIdeal) for state in sol.states]  #Fidelity Calculation for each state at time steps defined
+  fidel = fidelity(sol.states[-1], psIdeal)  #Fidelity Calculation for each state at time steps defined
   fideliti.append(fidel)
 
 """Plotting the Results"""
