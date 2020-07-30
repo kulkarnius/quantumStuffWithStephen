@@ -22,7 +22,7 @@ wga = 0                   #Frequency separation b/w |up> and  |down> for A
 wgb = 0                   #Frequency separation b/w |up> and  |down> for B
 
 wCBroad = 0.0   #Resonant frequency for the broad plasmonic mode
-wCNarrow = np.linspace(0,1000,10000)  #Resonant frequency for the narrow Fabry-Perot mode
+wCNarrow = np.linspace(0,1000,1000)  #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
 gBroadA = 0.0               #Coupling rate for A to the Broad Mode
@@ -109,8 +109,8 @@ Here, the states in increasing order of energy for the systems are |up>, |down>,
 
 downUpA  = tensor(qutrit_ops()[3], qeye(3), qeye(2), qeye(2))             #System A Annhilation operator for transition from down to up
 eDownA  = tensor(qutrit_ops()[4], qeye(3), qeye(2), qeye(2))              #System A Annhilation operator for transition from down to excited
-downUpB  = tensor(qutrit_ops()[3], qeye(3), qeye(2), qeye(2))             #System B Annhilation operator for transition from down to up
-eDownB  = tensor(qutrit_ops()[4], qeye(3), qeye(2), qeye(2))              #System B Annhilation operator for transition from down to excited
+downUpB  = tensor(qeye(3),qutrit_ops()[3],  qeye(2), qeye(2))             #System B Annhilation operator for transition from down to up
+eDownB  = tensor(qeye(3), qutrit_ops()[4], qeye(2), qeye(2))              #System B Annhilation operator for transition from down to excited
 aBroad  = tensor(qeye(3), qeye(3), destroy(2), qeye(2))                   #Destruction operator for Broad mode
 aNarrow  = tensor(qeye(3), qeye(3), qeye(2), destroy(2))                  #Destruction operator for Narrow mode
 
