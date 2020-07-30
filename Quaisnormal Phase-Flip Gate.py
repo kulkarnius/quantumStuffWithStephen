@@ -22,7 +22,7 @@ wga = 0                   #Frequency separation b/w |up> and  |down> for A
 wgb = 0                   #Frequency separation b/w |up> and  |down> for B
 
 wCBroad = 0.0   #Resonant frequency for the broad plasmonic mode
-wCNarrow = np.linspace(0,10,1000)  #Resonant frequency for the narrow Fabry-Perot mode
+wCNarrow = np.linspace(0,1000,10000)  #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
 gBroadA = 0.0               #Coupling rate for A to the Broad Mode
@@ -219,7 +219,7 @@ def c_ops():
 
 
 """Calculating Fidelity"""
-tlist = np.linspace(0,50,1000)                             #Time Steps
+tlist = np.linspace(0,500,1000)                             #Time Steps
 
 fideliti = []
 
