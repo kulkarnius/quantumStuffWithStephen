@@ -40,6 +40,7 @@ gammaStarB = 0.0            #Dephasing Rate for System B
 ka = 1                   #Broad Mode decay rate (I have currently used "a" and Broad interchangably)
 kb = 0.04                   #Narrow Mode decay rate (I have currently used "b" and Narrow interchangably)
 
+opts = Options(nsteps=1000000)
 
 #Defining S Matrix
 Svalues = [1,0,0,1] #[Saa, Sab, Sba, Sbb]
@@ -219,12 +220,12 @@ def c_ops():
 
 
 """Calculating Fidelity"""
-tlist = np.linspace(0,500,1000)                             #Time Steps
+tlist = np.linspace(0,5,10)                             #Time Steps
 
 fideliti = []
 
 for wNarrow in wNarrow:
-  sol = mesolve(H(), psi0, tlist, c_ops())          #Solver
+  sol = mesolve(H(), psi0, tlist, c_ops(), e_ops=[], args={}, options=opts)          #Solver
   fidel = fidelity(sol.states[-1], psIdeal)  #Fidelity Calculation for each state at time steps defined
   fideliti.append(fidel)
 
