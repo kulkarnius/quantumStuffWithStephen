@@ -186,10 +186,14 @@ def matrixfun():
   return rootKappaAA, rootKappaAB, rootKappaBA, rootKappaBB
 
 def c():
+  vca = eigensys("v")[0][0]
+  vcb = eigensys("v")[0][1]
   c = vca*aBroad + vcb*aNarrow
   return c
 
 def d():
+  vda = eigensys("v")[1][0]
+  vdb = eigensys("v")[1][1]
   d = vda*aBroad + vdb*aNarrow
   return d
 
