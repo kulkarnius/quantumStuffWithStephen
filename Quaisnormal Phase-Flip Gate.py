@@ -200,8 +200,6 @@ def d():
 
 
 """Collapse Operators"""
-
-
 def c_ops():
   collapseOperators = []
   # qubit relaxation
