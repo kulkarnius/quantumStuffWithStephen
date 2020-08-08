@@ -22,7 +22,7 @@ wga = 0                   #Frequency separation b/w |up> and  |down> for A
 wgb = 0                   #Frequency separation b/w |up> and  |down> for B
 
 wCBroad = 0.0   #Resonant frequency for the broad plasmonic mode
-wCNarrow = np.linspace(0,1000,1000)  #Resonant frequency for the narrow Fabry-Perot mode
+wCNarrow = np.linspace(1,100,100)  #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
 gBroadA = 0.0               #Coupling rate for A to the Broad Mode
@@ -40,7 +40,7 @@ gammaStarB = 0.0            #Dephasing Rate for System B
 ka = 1                   #Broad Mode decay rate (I have currently used "a" and Broad interchangably)
 kb = 0.04                   #Narrow Mode decay rate (I have currently used "b" and Narrow interchangably)
 
-opts = Options(nsteps=1000000)
+opts = Options(nsteps=10000)
 
 #Defining S Matrix
 Svalues = [1,0,0,1] #[Saa, Sab, Sba, Sbb]
@@ -218,11 +218,15 @@ def c_ops():
 
 
 """Calculating Fidelity"""
-tlist = np.linspace(0,5,10)                             #Time Steps
+
+tlist = [np.linspace()]
+
+final_states = 
 
 fideliti = []
 
 for wNarrow in wNarrow:
+  tlist = np.linspace(0,100*np.real(wNarrow),round(1000*np.real(wNarrow)))  #Time S
   sol = mesolve(H(), psi0, tlist, c_ops(), e_ops=[], args={}, options=opts)          #Solver
   fidel = fidelity(sol.states[-1], psIdeal)  #Fidelity Calculation for each state at time steps defined
   fideliti.append(fidel)
