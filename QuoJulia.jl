@@ -10,10 +10,12 @@ function psy(i,j,k,l)
 end
 
 """Initial State"""
-psi0 = 0.5 * (psy(2,2,1,1) + psy(2,1,1,1) + psy(3,2,1,1) + psy(3,1,1,1))        #tensor(|upA> + |downA>, |upB> + |downB>, |0>_Broad, |0>_Narrow|)
+psi0 = 0.5 * (psy(3,2,1,1) + psy(3,1,1,1) + psy(1,2,1,1) + psy(1,1,1,1))        #tensor(|upA> + |downA>, |upB> + |downB>, |0>_Broad, |0>_Narrow|)
 
 """Final Expected State"""
-psIdeal = 0.5 * (psy(2,2,1,1) + psy(2,1,1,1) + psy(3,2,1,1) - psy(3,1,1,1))
+psIdeal = 0.5 * (psy(3,2,1,1) - psy(3,1,1,1) + psy(1,2,1,1) + psy(1,1,1,1))
+
+rhoIdeal = tensor(psIdeal,dagger(psIdeal))
 
 """Global Parameters"""
 wa = 0.0                    #Frequency separation b/w |down> and |e> for A. The transition |down> -> |e> is coupled to the cavity
@@ -187,16 +189,14 @@ end
 J = [eDownA,eDownB, dagger(eDownA) * eDownA, dagger(eDownB) * eDownB, c(), d()]
 
 rates = [gammaA,gammaB,gammaStarA,gammaStarB,l1,l2]
+
 tlist = range(0,stop=(pi*real(wN)/(gNarrowA^2)), length=2)
 
-pt = timeevolution.master(tlist, psi0, H, J; rates=rates)
-println(pt[-1])
+tout, pt = timeevolution.master(tlist, psi0, H, J; rates=rates)
+
+print(fidelity(last(pt), rhoIdeal))
 
 
-
-#function fidelity(a)
-#    fide = tr(sqrt(real(sqrt(a) * (psIdeal * sqrt(a)))))
-#end
 
 #var = sqrt(CNarrowA) * 0.5
 #println(main(10))
