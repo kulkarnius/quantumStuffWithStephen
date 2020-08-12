@@ -4,16 +4,16 @@ using LinearAlgebra
 
 """States"""
 sysbas = NLevelBasis(3)
-cavbas = FockBasis(2)
+cavbas = FockBasis(1)
 function psy(i,j,k,l)
   a = tensor(nlevelstate(sysbas,i), nlevelstate(sysbas,j), fockstate(cavbas,k), fockstate(cavbas,l))
 end
 
 """Initial State"""
-psi0 = 0.5 * (psy(3,2,1,1) + psy(3,1,1,1) + psy(1,2,1,1) + psy(1,1,1,1))        #tensor(|upA> + |downA>, |upB> + |downB>, |0>_Broad, |0>_Narrow|)
+psi0 = 0.5 * (psy(3,2,0,0) + psy(3,1,0,0) + psy(1,2,0,0) + psy(1,1,0,0))        #tensor(|upA> + |downA>, |upB> + |downB>, |0>_Broad, |0>_Narrow|)
 
 """Final Expected State"""
-psIdeal = 0.5 * (psy(3,2,1,1) - psy(3,1,1,1) + psy(1,2,1,1) + psy(1,1,1,1))
+psIdeal = 0.5 * (psy(3,2,0,0) - psy(3,1,0,0) + psy(1,2,0,0) + psy(1,1,0,0))
 
 rhoIdeal = tensor(psIdeal,dagger(psIdeal))
 
@@ -24,14 +24,14 @@ wb = 0.0                   #Frequency separation b/w |down> and |e> for B. The t
 wga = 0.0                  #Frequency separation b/w |up> and  |down> for A
 wgb = 0.0                  #Frequency separation b/w |up> and  |down> for B
 
-wCBroad = 0.0             #Resonant frequency for the broad plasmonic mode
-wCNarrow = [1:1:100] #Resonant frequency for the narrow Fabry-Perot mode
+w1_tilde = 0.0             #Resonant frequency for the broad plasmonic mode
+w2_tilde = [1:1:100] #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
-gBroadA = 0.0               #Coupling rate for A to the Broad Mode
-gNarrowA = 0.1              #Coupling rate for A to the Narrow Mode
-gBroadB = 0.0               #Coupling rate for B to the Broad Mode
-gNarrowB = 0.1              #Coupling rates for B to the Narrow Mode
+g1A_tilde = 0.0               #Coupling rate for A to the Broad Mode
+g2A_tilde = 0.1              #Coupling rate for A to the Narrow Mode
+g1B_tilde = 0.0               #Coupling rate for B to the Broad Mode
+g2B_tilde = 0.1              #Coupling rates for B to the Narrow Mode
 
 """Decay Rates"""
 gammaA = 0.000005           #Decay Rate for System A
@@ -44,10 +44,10 @@ ka = 1.0                     #Broad Mode decay rate (I have currently used "a" a
 kb = 1.0                     #Narrow Mode decay rate (I have currently used "b" and Narrow interchangably)
 
 """Cavity Cooperativity"""
-CBroadA = 4 * (gBroadA^2) / (ka * gammaA)
-CNarrowA =  4 * (gNarrowA^2) / (ka * gammaA)
-CBroadB = 4 * (gBroadB^2) / (kb * gammaB)
-CNarrowB = 4 * (gNarrowB^2) / (kb * gammaB)
+C1A = 4 * (g1A_tilde^2) / (ka * gammaA)
+C2A =  4 * (g2A_tilde^2) / (ka * gammaA)
+C1B = 4 * (g1B_tilde^2) / (kb * gammaB)
+C2B = 4 * (g2B_tilde^2) / (kb * gammaB)
 
 #Defining S Matrix
 SMat = [[1,0] [0,1]] #[Saa, Sab, Sba, Sbb]
@@ -56,8 +56,9 @@ S_Sqrt = sqrt(SMat) #Taking Square root
 S_InvSqrt = sqrt(inv(SMat)) #Negative sqrt by taking an inversion and then a square root
 
 #Defining Complex Quasinormal mode frequencies
-wBroad = wCBroad - im*ka
-#wNarrow = [(Narrow - im*kb) for Narrow in wCNarrow]
+w1 = complex(w1_tilde, -ka)
+#w2 = [(Narrow - im*kb) for Narrow in w2_tilde]
+
 
 """
 Defining Operators: A similar tensor product between 4 systems. 
@@ -65,27 +66,25 @@ Here, the states in increasing order of energy for the systems are |up>, |down>,
 [System A, System B, Broad Mode, Narrow Mode]
 """
 
-t21 = transition(sysbas, 1, 2)
-t32 = transition(sysbas, 2, 3)
+sgm21 = transition(sysbas, 1, 2)
+sgm32 = transition(sysbas, 2, 3)
 
 coupled = tensor(sysbas,sysbas, cavbas,cavbas)
 
 
-downUpA  = tensor(t21, identityoperator(sysbas), identityoperator(cavbas), identityoperator(cavbas))             #System A Annhilation operator for transition from down to up
-eDownA  = tensor(t32, identityoperator(sysbas), identityoperator(cavbas), identityoperator(cavbas))              #System A Annhilation operator for transition from down to excited
-downUpB  = tensor(identityoperator(sysbas), t21, identityoperator(cavbas), identityoperator(cavbas))            #System B Annhilation operator for transition from down to up
-eDownB  = tensor(identityoperator(sysbas), t32, identityoperator(cavbas), identityoperator(cavbas))                #System B Annhilation operator for transition from down to excited
-aBroad  = tensor(identityoperator(sysbas), identityoperator(sysbas), destroy(cavbas), identityoperator(cavbas))                   #Destruction operator for Broad mode
-aNarrow  = tensor(identityoperator(sysbas), identityoperator(sysbas), identityoperator(cavbas), destroy(cavbas))                  #Destruction operator for Narrow mode
+downUpA  = embed(coupled, 1, sgm21)        #System A Annhilation operator for transition from down to up
+eDownA  = embed(coupled, 1, sgm32)            #System A Annhilation operator for transition from down to excited
+downUpB  = embed(coupled, 2, sgm21)          #System B Annhilation operator for transition from down to up
+eDownB  = embed(coupled, 2, sgm32)              #System B Annhilation operator for transition from down to excited
+a1  = embed(coupled, 3, destroy(cavbas))                  #Destruction operator for Broad mode
+a2  = embed(coupled, 4, destroy(cavbas))                 #Destruction operator for Narrow mode
 
 
-
-
-wN = complex(sqrt(CNarrowA) * 0.5, -kb)
+w2 = complex(sqrt(C2A) * 0.5, -kb)
 
 """Defining Chi values"""
 function X(i,j)
-  X = wBroad * S_InvSqrt[i,1] * S_Sqrt[1,j] + wN * S_InvSqrt[i,2] * S_Sqrt[2,j]
+  X = w1 * S_InvSqrt[i,1] * S_Sqrt[1,j] + w2 * S_InvSqrt[i,2] * S_Sqrt[2,j]
 end
   
 function Xp(i,j)
@@ -103,65 +102,34 @@ XPlus = [[Xp(1,1), Xp(2,1)] [Xp(2,1), Xp(2,2)]] #X+ = [Xaa, Xab, Xba, Xbb]
 XMinus = [[Xm(1,1),Xm(2,1)] [Xm(1,2),Xm(2,2)]] #X- = [Xaa, Xab, Xba, Xbb]
 
 #Coupling Constants
-function Ga(i)
-    if i == "Broad"
-        g = gBroadA * S_Sqrt[1,1] + gNarrowA * S_Sqrt[2,1]
-        return g
-    else
-        g = gBroadA * S_Sqrt[1,2] + gNarrowA * S_Sqrt[2,2]
-        return g
-    end
-  end
+ga1 = g1A_tilde * S_Sqrt[1,1] + g2A_tilde * S_Sqrt[2,1]
+ga2 = g1A_tilde * S_Sqrt[1,2] + g2A_tilde * S_Sqrt[2,2]
 
-function Gb(i)
-    if i == "Broad"
-          g = gBroadB * S_Sqrt[1,1] + gNarrowB * S_Sqrt[2,1]
-        return g
-    else
-        g = gBroadB * S_Sqrt[1,2] + gNarrowB * S_Sqrt[2,2]
-        return g
-    end
-  end
+gb1 = g1B_tilde * S_Sqrt[1,1] + g2B_tilde * S_Sqrt[2,1]
+gb2 = g1B_tilde * S_Sqrt[1,2] + g2B_tilde * S_Sqrt[2,2]
+
+      
 
 """Defining Sytem of qubits"""
-function Hk(k)
-    if k == "A"
-        H = wa * dagger(eDownA) * eDownA - wga * dagger(downUpA) * downUpA
-        return H
-    else
-        H = wb * dagger(eDownB) * eDownB - wgb * dagger(downUpB) * downUpB
-        return H
-    end
-  end
+HA = wa * dagger(eDownA) * eDownA - wga * dagger(downUpA) * downUpA
+HB = wb * dagger(eDownB) * eDownB - wgb * dagger(downUpB) * downUpB
+
 
 """Defining System of Modes"""
-function HC(c)
-    if c == "Broad"
-        H = XPlus[1,1] * dagger(aBroad) * aBroad
-        return H
-    else
-        H = XPlus[2,2] * dagger(aNarrow) * aNarrow
-        return H
-    end
-  end
+H1 = XPlus[1,1] * dagger(a1) * a1
+H2 = XPlus[2,2] * dagger(a2) * a2
+
 
 """Interaction Hamiltonian""" 
-function HI(i)
-    HOverlap = XPlus[1,2] * dagger(aBroad) * aNarrow + XPlus[2,1] * dagger(aNarrow) * aBroad
-    if i == "a"
-        H = Ga("Broad") * eDownA * dagger(aBroad) + conj(Ga("Broad")) * dagger(eDownA) * aBroad + Ga("Narrow") * eDownA * dagger(aNarrow) + conj(Ga("Narrow")) * dagger(eDownA) * aNarrow
-        HI = H + HOverlap
-        return HI
-    else
-        H = Gb("Broad") * eDownB * dagger(aBroad) + conj(Gb("Broad")) * dagger(eDownB) * aBroad + Gb("Narrow") * eDownB * dagger(aNarrow) + conj(Gb("Narrow")) * dagger(eDownB) * aNarrow
-        HI = H
-        return HI
-    end
-  end
+HOverlap = XPlus[1,2] * dagger(a1) * a2 + XPlus[2,1] * dagger(a2) * a1
+HIA = ga1 * eDownA * dagger(a1) + conj(ga1) * dagger(eDownA) * a1 + ga2 * eDownA * dagger(a2) + conj(ga2) * dagger(eDownA) * a2
+HIB = gb1 * eDownB * dagger(a1) + conj(gb1) * dagger(eDownB) * a1 + gb2 * eDownB * dagger(a2) + conj(gb2) * dagger(eDownB) * a2
+
 
 """Total Hamiltonian"""
 
-H = Hk("A") + Hk("B") + HC("Broad") + HC("Narrow") + HI("a") + HI("b")
+H = HA + HB + H1 + H2 + HIA + HIB + HOverlap
+
 
 """Basis Change"""
 la = eigvals(XMinus) #Solve Eigensystem
@@ -176,28 +144,33 @@ vdb = v[2,2] / sqrt(abs(v[2,1])^2 + abs(v[2,2])^2)
 l1 = la[1]
 l2 = la[2] #Parse Eigenvalues 
 
-function c()
-  c = vca*aBroad + vcb*aNarrow
-end 
+c = vca*a1 + vcb*a2
+d = vda*a1 + vdb*a2
 
-function d()
-  d = vda*aBroad + vdb*aNarrow
-end
 
 
 """Collapse Operators"""
-J = [eDownA,eDownB, dagger(eDownA) * eDownA, dagger(eDownB) * eDownB, c(), d()]
+J = []
 
-rates = [gammaA,gammaB,gammaStarA,gammaStarB,l1,l2]
+push!(J,sqrt(gammaA)*eDownA)
+push!(J,sqrt(gammaB)*eDownB)
+push!(J,sqrt(gammaStarA)*dagger(eDownA) *eDownA)
+push!(J,sqrt(gammaStarB)*dagger(eDownB) *eDownB)
+push!(J,sqrt(l1)*c)
+push!(J,sqrt(l2)*d)
 
-tlist = range(0,stop=(pi*real(wN)/(gNarrowA^2)), length=2)
-
-tout, pt = timeevolution.master(tlist, psi0, H, J; rates=rates)
-
-print(fidelity(last(pt), rhoIdeal))
+function myFidelity(t, p)
+  fidelity(p, rhoIdeal)
+end
 
 
+tfinal = (pi*real(w2)/(g2A_tilde^2))
+tlist = [0,tfinal]
 
-#var = sqrt(CNarrowA) * 0.5
-#println(main(10))
+tout, fideliti = timeevolution.master(tlist, psi0, H, J; fout=myFidelity)
+
+
+print(last(fideliti))
+
+@time timeevolution.master(tlist, psi0, H, J; fout=myFidelity)
 
