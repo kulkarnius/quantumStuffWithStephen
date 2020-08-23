@@ -5,6 +5,13 @@ import scipy as sp
 import matplotlib.pyplot as plt
 import time
 
+downUpA  = tensor(qutrit_ops()[3], qeye(3), qeye(2), qeye(2))             #System A Annhilation operator for transition from down to up
+eDownA  = tensor(qutrit_ops()[4], qeye(3), qeye(2), qeye(2))              #System A Annhilation operator for transition from down to excited
+downUpB  = tensor(qeye(3),qutrit_ops()[3],  qeye(2), qeye(2))             #System B Annhilation operator for transition from down to up
+eDownB  = tensor(qeye(3), qutrit_ops()[4], qeye(2), qeye(2))              #System B Annhilation operator for transition from down to excited
+a1  = tensor(qeye(3), qeye(3), destroy(2), qeye(2))                       #Destruction operator for Broad mode
+a2  = tensor(qeye(3), qeye(3), qeye(2), destroy(2))                       #Destruction operator for Narrow mode
+
 """States"""
 def psy(i,j,k,l):
   a = tensor(basis(3,i), basis(3,j), basis(2,k), basis(2,l))
@@ -30,7 +37,7 @@ wC1 = delta + Delta             #Resonant frequency for the broad plasmonic mode
 wC2 = delta
 
 """Gate Time"""
-tfinal = 315.722  
+#tfinal = 315.722  
 
 """Cavity Cooperativity"""
 C1A = 1200.
@@ -73,7 +80,7 @@ S_InvSqrt = sp.linalg.sqrtm(sp.linalg.inv(SMatrix)) #Negative sqrt by taking an 
 w1 = np.complex(wC1, -k1)
 w2 = np.complex(wC2, -k2)
 
-def main():
+def main(tfinal):
   """Defining Chi values"""
   def X(i,j):
     X = w1 * S_InvSqrt[i][0]*S_Sqrt[0][j] + w2 * S_InvSqrt[i][1]*S_Sqrt[1][j]
@@ -155,7 +162,7 @@ def main():
   collapseOperators.append(np.sqrt(l2) * d)
 
   """Constructing the Liouvillian Superoperator"""
-  L = liouvillian(H,c_ops=collapseOperators)
+  L = liouvillian(H, c_ops=collapseOperators)
 
   """Matrix Exponential"""
   op = (tfinal * L).expm()
@@ -172,5 +179,11 @@ def main():
 
   return fidelity(rhofinal, psIdeal)
 
-print(main())
+times = np.linspace(0,500,500)
+
+fidelitis = [main(t) for t in times]
+
+fig,ax = plt.subplots()
+ax.plot(times, fidelitis)
+plt.show()
 
