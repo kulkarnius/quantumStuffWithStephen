@@ -68,8 +68,8 @@ S_Sqrt = sqrt(SMat) #Taking Square root
 S_InvSqrt = sqrt(inv(SMat)) #Negative sqrt by taking an inversion and then a square root
 
 #Defining Complex Quasinormal mode frequencies
-w1 = complex(w1_tilde, -k1)
-w2 = complex(w2_tilde, -k2)
+w1 = complex(wC1, -k1)
+w2 = complex(wC2, -k2)
 
 
 """
@@ -145,17 +145,24 @@ c = vca*a1 + vcb*a2
 d = vda*a1 + vdb*a2
 
 """Collapse Operators"""
-J = [eDownA, eDownB, dagger(eDownA)*eDownA, dagger(eDownB)*eDownB, c, d]
+J = []
 
-rates = [gammaA, gammaB, gammaStarA, gammaStarB, l1, l2]
+push!(J,sqrt(gammaA)*eDownA)
+push!(J,sqrt(gammaB)*eDownB)
+push!(J,sqrt(gammaStarA)*dagger(eDownA) *eDownA)
+push!(J,sqrt(gammaStarB)*dagger(eDownB) *eDownB)
+push!(J,sqrt(l1)*c)
+push!(J,sqrt(l2)*d)
 
 """Defining Liouvillian"""
-L = liouvillian(H, J; rates)
+L = liouvillian(H, J)
 
 """Matrix Exponential"""
-op = exp(tfinal * L)
+op = exp(tfinal*L)
 
-"""Density Matrix Calculations"""
+
+
+"""Density Matrix Calculations
 
 vec_rho0 = vec(rho0)         #Vectorizing density matrix
 
@@ -163,4 +170,4 @@ vec_rhofinal = op * vec_rho0                #Applying superoperator to vectorize
 
 rhofinal = reshape(vec_rhofinal, 36, 36) #Converting final vector into density matrix  
 
-print(idelity(rhofinal,rhoIdeal))
+print(idelity(rhofinal,rhoIdeal)) """
