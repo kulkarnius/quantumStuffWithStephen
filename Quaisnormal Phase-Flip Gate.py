@@ -1,3 +1,4 @@
+
 """
 Gate from 2nd scheme in
 "Cavity-assisted controlled phase-flip gates" from F. Kimiaee, S.C.Wein, and C.Simon
@@ -18,6 +19,7 @@ Qubits -> System A and System B
 
 """Importing Libraries"""
 import numpy as np
+import time
 import scipy as sp
 import matplotlib
 import matplotlib.pyplot as plt
@@ -41,14 +43,14 @@ wb = 0.0                   #Frequency separation b/w |down> and |e> for B. The t
 wga = 0.0                  #Frequency separation b/w |up> and  |down> for A
 wgb = 0.0                  #Frequency separation b/w |up> and  |down> for B
 
-wC1 = 0.0             #Resonant frequency for the broad plasmonic mode
+wC1 = 1.0             #Resonant frequency for the broad plasmonic mode
 wC2 = np.linspace(1,100,100)  #Resonant frequency for the narrow Fabry-Perot mode
 
 """Coupling Rates"""
-g1A_tilde = 0.0               #Coupling rate for A to the Broad Mode
-g2A_tilde = 0.1              #Coupling rate for A to the Narrow Mode
-g1B_tilde = 0.0               #Coupling rate for B to the Broad Mode
-g2B_tilde = 0.1              #Coupling rates for B to the Narrow Mode
+g1A_tilde = 0.1               #Coupling rate for A to the Broad Mode
+g2A_tilde = 0.01              #Coupling rate for A to the Narrow Mode
+g1B_tilde = 0.1               #Coupling rate for B to the Broad Mode
+g2B_tilde = 0.01              #Coupling rates for B to the Narrow Mode
 
 """Decay Rates"""
 gammaA = 0.000005           #Decay Rate for System A
@@ -57,8 +59,8 @@ gammaB = 0.000005           #Decay Rate for System B
 gammaStarB = 0.0            #Dephasing Rate for System B
 
 """Mode Decay rates"""
-ka = 1.0                     #Broad Mode decay rate (I have currently used "a" and Broad interchangably)
-kb = 1.0                     #Narrow Mode decay rate (I have currently used "b" and Narrow interchangably)
+ka = 0.1                     #Broad Mode decay rate (I have currently used "a" and Broad interchangably)
+kb = 4.0                     #Narrow Mode decay rate (I have currently used "b" and Narrow interchangably)
 
 """Cavity Cooperativity"""
 C1A = 4 * (g1A_tilde**2) / (ka * gammaA)
@@ -66,10 +68,10 @@ C2A =  4 * (g2A_tilde**2) / (ka * gammaA)
 C1B = 4 * (g1B_tilde**2) / (kb * gammaB)
 C2B = 4 * (g2B_tilde**2) / (kb * gammaB)
 
-opts = Options(nsteps=1000000, atol=1e-05, rtol=1e-04)
+opts = Options(nsteps=10000000, atol=1e-05, rtol=1e-04)
 
 #Defining S Matrix
-Svalues = [1,0,0,1] #[Saa, Sab, Sba, Sbb]
+Svalues = [1,0.94,0.94,1] #[Saa, Sab, Sba, Sbb]
 SMatrix = np.matrix([[Svalues[0], Svalues[1]],[Svalues[2], Svalues[3]]])
 
 S_Sqrt = sp.linalg.sqrtm(SMatrix) #Taking Square root
@@ -164,11 +166,6 @@ def main(wN):
 
   l1, l2 = la #Parse Eigenvalues 
 
-  # rootKappaAA = (1/(sp.linalg.det(V))) * (vca * vdb * np.sqrt(l1) - vcb * vda * np.sqrt(l2))
-  # rootKappaAB = (1/(sp.linalg.det(V))) * (vcb * vdb * (np.sqrt(l1) - np.sqrt(l2)))
-  # rootKappaBA = (1/(sp.linalg.det(V))) * (vca * vda * (np.sqrt(l2) - np.sqrt(l1)))
-  # rootKappaBB = (1/(sp.linalg.det(V))) * (vca * vdb * np.sqrt(l2) - vcb * vda * np.sqrt(l1))
-
   c = vca*a1 + vcb*a2
 
   d = vda*a1 + vdb*a2
@@ -185,20 +182,17 @@ def main(wN):
   collapseOperators.append(np.sqrt(gammaStarB) * eDownB.dag() * eDownB)
 
   # Weird Coupling Terms
-  # collapseOperators.append(rootKappaAA * aBroad + rootKappaAB * aNarrow)
-  # collapseOperators.append(rootKappaBA * aBroad + rootKappaBB * aNarrow)
   collapseOperators.append(np.sqrt(l1) * c)
   collapseOperators.append(np.sqrt(l2) * d)
 
-  tlist = np.linspace(0,np.pi*np.real(wN)/(g2A_tilde**2), 2)
+  tlist = [0, 20000]
   final_state = mesolve(H, psi0, tlist, collapseOperators, e_ops=[], args={}, options=opts).states[-1]
 
   return final_state
-fidelity(main(np.complex(np.sqrt(C2A) / 2, -kb)),psIdeal)
 
 """Calculating Fidelity"""
 
-final_states = [map(main(wN),w2)]
+final_states = [main(w) for w in w2]
 fideliti = [fidelity(final_state, psIdeal) for final_state in final_states]
 
 
@@ -208,5 +202,6 @@ axes.plot(wC2, fideliti)
 axes.set(xlabel="Cavity", ylabel="Fidelity", title='Fidelity as a function of wCNarrow')
 plt.show()
 
-print(1 - np.pi / np.sqrt(CNarrowA) + 36* np.pi**2 / (32 * CNarrowA))
-print(np.sqrt(CNarrowA)/2)
+print(1 - np.pi / np.sqrt(C2A) + 36* np.pi**2 / (32 * C2A))
+print(np.sqrt(C2A)/2)
+
