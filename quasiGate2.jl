@@ -1,6 +1,7 @@
 using QuantumOptics
 using PyPlot
 using LinearAlgebra
+using Arpack
 
 """States"""
 sysbas = NLevelBasis(3)
@@ -157,8 +158,13 @@ push!(J,sqrt(l2)*d)
 """Defining Liouvillian"""
 L = liouvillian(H, J)
 
+
+print(steadystate.eigenvector(H,J; nev=1))
+
+
+
 """Matrix Exponential"""
-op = exp(tfinal*L)
+#op = exp(tfinal*L)
 
 
 
